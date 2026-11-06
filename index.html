@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Расписание 2 «А» класса - Таис Кириченко</title>
+  <style>
+    :root {
+      --paper: #f4fbff;
+      --paper-deep: #e2f4ff;
+      --ink: #17324d;
+      --muted: #587087;
+      --green: #1687c2;
+      --green-soft: #e4f5ff;
+      --ochre: #d97613;
+      --ochre-soft: #fff3d6;
+      --blue: #2873b8;
+      --blue-soft: #e7f2ff;
+      --berry: #c7436d;
+      --berry-soft: #ffedf3;
+      --rule: #c8dfed;
+      --white: #ffffff;
+      --sun: #ffd85a;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: "Avenir Next", Avenir, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.35;
+    }
+
+    button { font: inherit; }
+
+    button:focus-visible {
+      outline: 3px solid #c47a37;
+      outline-offset: 3px;
+    }
+
+    .shell {
+      width: min(100% - 24px, 1480px);
+      margin: 0 auto;
+      padding: 18px 0 40px;
+    }
+
+    .masthead {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 24px;
+      padding: 24px 26px;
+      background: var(--white);
+      border: 2px solid #bfe2f4;
+      border-bottom: 7px solid var(--sun);
+      border-radius: 22px;
+    }
+
+    .school-year {
+      margin: 0 0 5px;
+      color: var(--green);
+      font-size: .88rem;
+      font-weight: 800;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-family: "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+      font-size: clamp(2rem, 5vw, 4.8rem);
+      font-weight: 700;
+      line-height: .98;
+      letter-spacing: -.025em;
+    }
+
+    .student {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .print-button {
+      min-height: 48px;
+      padding: 11px 16px;
+      color: var(--white);
+      background: var(--green);
+      border: 2px solid var(--green);
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 750;
+      transition: background-color .15s ease, color .15s ease;
+    }
+
+    .print-button:hover { background: #086b9f; }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin: 18px 0 14px;
+      padding: 4px;
+      width: max-content;
+      max-width: 100%;
+      background: var(--paper-deep);
+      border: 2px solid #bfe3f6;
+      border-radius: 14px;
+    }
+
+    .tab {
+      min-height: 44px;
+      padding: 9px 18px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .tab[aria-selected="true"] {
+      color: var(--white);
+      background: var(--green);
+    }
+
+    .panel[hidden] { display: none; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .filters, .day-picker {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .filters::-webkit-scrollbar, .day-picker::-webkit-scrollbar { display: none; }
+
+    .filter, .day-choice {
+      min-height: 42px;
+      padding: 8px 13px;
+      flex: 0 0 auto;
+      color: var(--ink);
+      background: transparent;
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .filter[aria-pressed="true"], .day-choice[aria-pressed="true"] {
+      color: var(--white);
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .day-picker { display: none; }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      align-items: start;
+    }
+
+    .day-column {
+      min-width: 0;
+      background: var(--white);
+      border: 1px solid var(--rule);
+      border-top: 7px solid #29a3df;
+      border-radius: 8px 8px 16px 16px;
+      overflow: hidden;
+    }
+
+    .day-column:nth-child(2) { border-top-color: #5bbf9f; }
+    .day-column:nth-child(3) { border-top-color: #f2b33d; }
+    .day-column:nth-child(4) { border-top-color: #ed7296; }
+    .day-column:nth-child(5) { border-top-color: #7f79cf; }
+
+    .day-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 58px;
+      padding: 13px 12px 10px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .day-name {
+      margin: 0;
+      font-family: "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+      font-size: clamp(1.18rem, 1.8vw, 1.55rem);
+      line-height: 1;
+    }
+
+    .day-count {
+      color: var(--muted);
+      font-size: .72rem;
+      white-space: nowrap;
+    }
+
+    .items { padding: 8px; }
+
+    .schedule-item {
+      display: grid;
+      grid-template-columns: 68px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      min-height: 54px;
+      margin-bottom: 6px;
+      padding: 9px;
+      background: var(--green-soft);
+      border: 0;
+      border-radius: 10px;
+    }
+
+    .schedule-item:last-child { margin-bottom: 0; }
+
+    .schedule-item.type-meal { background: var(--ochre-soft); }
+    .schedule-item.type-routine { background: var(--blue-soft); }
+    .schedule-item.type-club { background: var(--berry-soft); }
+
+    .schedule-item[hidden] { display: none; }
+
+    .time {
+      color: var(--muted);
+      font-family: "Avenir Next", Avenir, sans-serif;
+      font-size: .72rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.25;
+    }
+
+    .item-title {
+      min-width: 0;
+      font-size: .86rem;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+    }
+
+    .lesson-emoji {
+      flex: 0 0 auto;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin: 14px 2px 0;
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .legend .meal::before { background: var(--ochre); }
+    .legend .routine::before { background: var(--blue); }
+    .legend .club::before { background: var(--berry); }
+
+    .events-intro {
+      max-width: 700px;
+      margin: 4px 0 22px;
+      color: var(--muted);
+      font-size: .98rem;
+    }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .month {
+      background: var(--white);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .month h2 {
+      margin: 0;
+      padding: 15px 17px 12px;
+      color: var(--white);
+      background: var(--green);
+      font-family: "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+      font-size: 1.55rem;
+    }
+
+    .event-list { margin: 0; padding: 4px 16px 12px; }
+
+    .event {
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid #ded6c7;
+    }
+
+    .event:last-child { border-bottom: 0; }
+
+    .event-date {
+      color: var(--green);
+      font-family: "Arial Rounded MT Bold", "Trebuchet MS", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .event-title { font-weight: 650; }
+    .event.birthday .event-title { color: var(--berry); }
+
+    .source-note {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: .76rem;
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(100% - 20px, 680px); padding-top: 8px; }
+      .masthead { grid-template-columns: 1fr; gap: 14px; padding: 20px 18px; }
+      h1 { max-width: none; font-size: clamp(2rem, 9vw, 2.35rem); }
+      .print-button { width: 100%; }
+      .tabs { width: 100%; }
+      .tab { flex: 1 1 50%; }
+      .toolbar { display: block; }
+      .day-picker { display: flex; margin-bottom: 10px; }
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: visible;
+        padding-bottom: 2px;
+      }
+      .filter { width: 100%; }
+      .schedule-grid { display: block; }
+      .day-column { display: none; }
+      .day-column.active-mobile { display: block; }
+      .day-header { min-height: 64px; }
+      .day-name { font-size: 1.65rem; }
+      .items { padding-inline: 12px; }
+      .schedule-item { grid-template-columns: 82px minmax(0, 1fr); min-height: 58px; padding: 11px 2px; }
+      .time { font-size: .78rem; }
+      .item-title { font-size: .96rem; }
+      .events-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .001ms !important; }
+    }
+
+    @page { size: A4 landscape; margin: 8mm; }
+
+    @media print {
+      :root { --paper: #fff; --white: #fff; --rule: #8f8f8f; }
+      body { background: #fff; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .shell { width: 100%; margin: 0; padding: 0; }
+      .masthead { grid-template-columns: 1fr; padding: 0 0 3mm; border: 0; border-bottom: 2pt solid #1687c2; border-radius: 0; }
+      .school-year { margin-bottom: 1mm; font-size: 7.5pt; }
+      h1 { max-width: none; font-size: 23pt; line-height: 1; }
+      .student { margin-top: 1mm; font-size: 8.5pt; }
+      .print-button, .tabs, .toolbar, .legend, .source-note, #events { display: none !important; }
+      #schedule { display: block !important; }
+      .schedule-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2mm; margin-top: 3mm; }
+      .day-column, .day-column.active-mobile { display: block !important; break-inside: avoid; border-top-width: 3pt; border-radius: 0; }
+      .day-header { min-height: 9mm; padding: 2mm; }
+      .day-name { font-size: 11pt; }
+      .day-count { font-size: 6pt; }
+      .items { padding: 1mm 2mm; }
+      .schedule-item { grid-template-columns: 20mm minmax(0, 1fr); gap: 1.5mm; min-height: 0; margin-bottom: .8mm; padding: 1.7mm; border-radius: 2mm; }
+      .time { font-size: 6.1pt; line-height: 1.1; }
+      .item-title { font-size: 7.3pt; line-height: 1.13; }
+      .lesson-emoji { font-size: 8pt; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div>
+        <p class="school-year">2026 / 2027 учебный год</p>
+        <h1>Расписание 2 «А» класса</h1>
+        <p class="student">Таис Кириченко</p>
+      </div>
+      <button class="print-button" type="button" onclick="window.print()">🖨️ Распечатать расписание</button>
+    </header>
+
+    <nav class="tabs" aria-label="Разделы">
+      <button class="tab" id="tab-schedule" type="button" role="tab" aria-selected="true" aria-controls="schedule">🗓️ Расписание</button>
+      <button class="tab" id="tab-events" type="button" role="tab" aria-selected="false" aria-controls="events">🎉 События</button>
+    </nav>
+
+    <section class="panel" id="schedule" role="tabpanel" aria-labelledby="tab-schedule">
+      <div class="toolbar">
+        <div class="day-picker" id="dayPicker" aria-label="Выбрать день"></div>
+        <div class="filters" aria-label="Фильтр расписания">
+          <button class="filter" type="button" data-filter="all" aria-pressed="true">🌈 Весь день</button>
+          <button class="filter" type="button" data-filter="lesson" aria-pressed="false">📚 Уроки</button>
+          <button class="filter" type="button" data-filter="routine" aria-pressed="false">🍎 Режим дня</button>
+          <button class="filter" type="button" data-filter="club" aria-pressed="false">🎨 Кружки</button>
+        </div>
+      </div>
+
+      <div class="schedule-grid" id="scheduleGrid"></div>
+      <div class="legend" aria-label="Обозначения">
+        <span>Уроки</span><span class="meal">Питание</span><span class="routine">Режим дня</span><span class="club">Кружки</span>
+      </div>
+    </section>
+
+    <section class="panel" id="events" role="tabpanel" aria-labelledby="tab-events" hidden>
+      <p class="events-intro">Предстоящие события, относящиеся ко 2 «А» классу и параллели вторых классов.</p>
+      <p class="events-intro"><strong>Аттестация 2 «А»:</strong> 5 ноября — русский язык; 9 ноября — английский язык и чтение; 10 ноября — окружающий мир; 11 ноября — математика. Просьба поддержать детей в подготовке и обеспечить очное присутствие в указанные дни.</p>
+      <div class="events-grid" id="eventsGrid"></div>
+    </section>
+
+    <p class="source-note">Составлено по расписанию и школьным календарям на октябрь — декабрь 2026 года. Даты аттестации 2 «А» — по сообщению школы. Просьба обеспечить очное присутствие ребёнка в дни аттестации и помочь с подготовкой.</p>
+  </main>
+
+  <script>
+    const scheduleData = {
+      "Понедельник": [
+        ["08:10-08:50", "Кембридж Movers", "lesson"],
+        ["09:00-09:40", "Чтение", "lesson"],
+        ["09:40-09:55", "Второй завтрак", "meal"],
+        ["09:55-10:35", "Русский язык", "lesson"],
+        ["10:50-11:30", "Математика", "lesson"],
+        ["11:40-12:20", "Английский язык", "lesson"],
+        ["12:30-13:10", "Физкультура", "lesson"],
+        ["13:20-14:00", "ИЗО", "lesson"],
+        ["14:10-14:30", "Обед", "meal"],
+        ["14:30-15:30", "Прогулка", "routine"],
+        ["15:30-16:30", "Самоподготовка", "routine"],
+        ["16:30-16:45", "Полдник", "meal"],
+        ["16:45-17:25", "Дополнительный платный кружок: дзюдо", "club"],
+        ["17:10-17:50", "Художественная мастерская", "club"],
+        ["17:50-18:30", "Опыты", "club"]
+      ],
+      "Вторник": [
+        ["08:10-08:50", "Кембридж Starters", "lesson"],
+        ["09:00-09:40", "Чтение", "lesson"],
+        ["09:40-09:55", "Второй завтрак", "meal"],
+        ["09:55-10:35", "Математика", "lesson"],
+        ["10:50-11:30", "Окружающий мир", "lesson"],
+        ["11:40-12:20", "Русский язык", "lesson"],
+        ["12:30-13:10", "Коммуникация", "lesson"],
+        ["13:20-14:00", "Шахматы", "lesson"],
+        ["14:10-14:30", "Обед", "meal"],
+        ["14:30-15:30", "Прогулка", "routine"],
+        ["15:30-16:30", "Самоподготовка", "routine"],
+        ["16:30-16:45", "Полдник", "meal"],
+        ["16:45-17:25", "Дополнительный платный кружок: создание кукол", "club"],
+        ["16:45-17:25", "Шахматы / футбол", "club"],
+        ["17:30-18:10", "Столярная мастерская", "club"]
+      ],
+      "Среда": [
+        ["08:10-08:50", "Кембридж Flyers", "lesson"],
+        ["09:00-09:40", "Тайм-менеджмент", "lesson"],
+        ["09:40-09:55", "Второй завтрак", "meal"],
+        ["09:55-10:35", "Русский язык", "lesson"],
+        ["10:50-11:30", "Физкультура", "lesson"],
+        ["11:40-12:20", "Математика", "lesson"],
+        ["12:30-13:10", "Английский язык", "lesson"],
+        ["13:20-14:00", "Чтение", "lesson"],
+        ["14:10-14:30", "Обед", "meal"],
+        ["14:30-15:30", "Прогулка", "routine"],
+        ["15:30-16:30", "Самоподготовка", "routine"],
+        ["16:30-16:45", "Полдник", "meal"],
+        ["16:45-17:25", "Баскетбол", "club"],
+        ["17:55-18:35", "Текстильная мастерская", "club"]
+      ],
+      "Четверг": [
+        ["09:00-09:40", "Математика", "lesson"],
+        ["09:40-09:55", "Второй завтрак", "meal"],
+        ["09:55-10:35", "Театр", "lesson"],
+        ["10:50-11:30", "ИЗО", "lesson"],
+        ["11:40-12:20", "Русский язык", "lesson"],
+        ["12:30-13:10", "Музыка", "lesson"],
+        ["13:20-14:00", "Чтение", "lesson"],
+        ["14:10-14:30", "Обед", "meal"],
+        ["14:30-15:30", "Прогулка", "routine"],
+        ["15:30-16:30", "Самоподготовка", "routine"],
+        ["16:30-16:45", "Полдник", "meal"],
+        ["16:45-18:00", "Дополнительный платный кружок: керамика", "club"],
+        ["16:45-17:25", "ГТО", "club"],
+        ["17:50-18:30", "Юный медик", "club"]
+      ],
+      "Пятница": [
+        ["09:00-09:40", "Английский язык", "lesson"],
+        ["09:40-09:55", "Второй завтрак", "meal"],
+        ["09:55-10:35", "Окружающий мир", "lesson"],
+        ["10:50-11:30", "Русский язык", "lesson"],
+        ["11:40-12:20", "Кураторский час", "lesson"],
+        ["12:30-13:10", "Математика", "lesson"],
+        ["13:20-14:00", "Развитие речи", "lesson"],
+        ["14:10-14:30", "Обед", "meal"],
+        ["14:30-15:30", "Прогулка", "routine"],
+        ["15:30-16:30", "Настольный теннис / волейбол", "club"],
+        ["16:30-16:45", "Полдник", "meal"],
+        ["17:00-17:40", "Футбол", "club"]
+      ]
+    };
+
+    const eventData = [
+      {
+        month: "Октябрь",
+        events: [
+          ["28", "Международный день мультфильмов (1–4 классы)"]
+        ]
+      },
+      {
+        month: "Ноябрь",
+        events: [
+          ["5", "Аттестация 2 «А»: русский язык"],
+          ["9", "Аттестация 2 «А»: английский язык и чтение"],
+          ["10", "Аттестация 2 «А»: окружающий мир"],
+          ["11", "Аттестация 2 «А»: математика"]
+        ]
+      },
+      {
+        month: "Декабрь",
+        events: [
+          ["8", "Контрольный день (2–11 классы)"],
+          ["11", "Родительский день (1–4 классы)"],
+          ["25", "Окончание 2 четверти. Новогодняя ярмарка"]
+        ]
+      }
+    ];
+
+    const dayNames = Object.keys(scheduleData);
+    let activeDay = 0;
+    let activeFilter = "all";
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, char => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"})[char]);
+    }
+
+    function subjectEmoji(title) {
+      const rules = [
+        [/Кембридж|Английский/i, "🇬🇧"],
+        [/Чтение|Развитие речи/i, "📖"],
+        [/Второй завтрак/i, "🥐"],
+        [/Полдник/i, "🍎"],
+        [/Обед/i, "🍲"],
+        [/Русский/i, "✍️"],
+        [/Математика/i, "🧮"],
+        [/Физкультура/i, "🏃"],
+        [/Коммуникация/i, "💬"],
+        [/Прогулка/i, "🌳"],
+        [/Самоподготовка/i, "🎒"],
+        [/дзюдо/i, "🥋"],
+        [/Художественная/i, "🎨"],
+        [/Опыты/i, "🧪"],
+        [/Тайм-менеджмент/i, "⏰"],
+        [/ИЗО/i, "🖍️"],
+        [/Окружающий мир/i, "🌍"],
+        [/Шахматы/i, "♟️"],
+        [/создание кукол/i, "🧸"],
+        [/футбол/i, "⚽"],
+        [/Столярная/i, "🪚"],
+        [/Баскетбол/i, "🏀"],
+        [/Текстильная/i, "🧵"],
+        [/Театр/i, "🎭"],
+        [/Музыка/i, "🎵"],
+        [/ГТО/i, "🏅"],
+        [/Юный медик/i, "🩺"],
+        [/Кураторский/i, "🤝"],
+        [/Настольный теннис/i, "🏓"],
+        [/Волейбол/i, "🏐"]
+      ];
+      return (rules.find(([pattern]) => pattern.test(title)) || [null, "📚"])[1];
+    }
+
+    function renderSchedule() {
+      const grid = document.getElementById("scheduleGrid");
+      grid.innerHTML = dayNames.map((day, index) => {
+        const lessons = scheduleData[day].filter(item => item[2] === "lesson").length;
+        const rows = scheduleData[day].map(item => `
+          <div class="schedule-item type-${esc(item[2])}" data-type="${esc(item[2])}">
+            <time class="time">${esc(item[0])}</time>
+            <div class="item-title"><span class="lesson-emoji" aria-hidden="true">${subjectEmoji(item[1])}</span><span>${esc(item[1])}</span></div>
+          </div>`).join("");
+        return `<article class="day-column${index === activeDay ? " active-mobile" : ""}" data-day-index="${index}">
+          <header class="day-header"><h2 class="day-name">${esc(day)}</h2><span class="day-count">${lessons} уроков</span></header>
+          <div class="items">${rows}</div>
+        </article>`;
+      }).join("");
+      applyFilter();
+    }
+
+    function renderDayPicker() {
+      document.getElementById("dayPicker").innerHTML = dayNames.map((day, index) =>
+        `<button class="day-choice" type="button" data-day="${index}" aria-pressed="${index === activeDay}">${esc(day.slice(0, 2))}</button>`
+      ).join("");
+    }
+
+    function renderEvents() {
+      document.getElementById("eventsGrid").innerHTML = eventData.map(month => `
+        <article class="month">
+          <h2>${esc(month.month)}</h2>
+          <div class="event-list">${month.events.map(event => `
+            <div class="event${event[2] === "birthday" ? " birthday" : ""}">
+              <div class="event-date">${esc(event[0])}</div>
+              <div class="event-title">${esc(event[1])}</div>
+            </div>`).join("")}
+          </div>
+        </article>`).join("");
+    }
+
+    function setDay(index) {
+      activeDay = index;
+      document.querySelectorAll(".day-column").forEach((column, i) => column.classList.toggle("active-mobile", i === activeDay));
+      document.querySelectorAll(".day-choice").forEach((button, i) => button.setAttribute("aria-pressed", String(i === activeDay)));
+    }
+
+    function applyFilter() {
+      document.querySelectorAll(".schedule-item").forEach(item => {
+        const isRoutine = item.dataset.type === "routine" || item.dataset.type === "meal";
+        item.hidden = activeFilter !== "all" && item.dataset.type !== activeFilter && !(activeFilter === "routine" && isRoutine);
+      });
+    }
+
+    document.querySelector(".tabs").addEventListener("click", event => {
+      const tab = event.target.closest(".tab");
+      if (!tab) return;
+      document.querySelectorAll(".tab").forEach(button => button.setAttribute("aria-selected", String(button === tab)));
+      document.getElementById("schedule").hidden = tab.id !== "tab-schedule";
+      document.getElementById("events").hidden = tab.id !== "tab-events";
+    });
+
+    document.querySelector(".filters").addEventListener("click", event => {
+      const button = event.target.closest(".filter");
+      if (!button) return;
+      activeFilter = button.dataset.filter;
+      document.querySelectorAll(".filter").forEach(item => item.setAttribute("aria-pressed", String(item === button)));
+      applyFilter();
+    });
+
+    document.getElementById("dayPicker").addEventListener("click", event => {
+      const button = event.target.closest(".day-choice");
+      if (button) setDay(Number(button.dataset.day));
+    });
+
+    const currentDay = new Date().getDay();
+    activeDay = currentDay >= 1 && currentDay <= 5 ? currentDay - 1 : 0;
+    renderDayPicker();
+    renderSchedule();
+    renderEvents();
+  </script>
+</body>
+</html>
